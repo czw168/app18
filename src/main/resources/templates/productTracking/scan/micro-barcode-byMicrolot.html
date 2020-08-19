@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/default/easyui.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/icon.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/demo/demo.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.easyui.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/locale/easyui-lang-zh_CN.js}"></script>
+</head>
+<body>
+
+<hr/>
+<h1>按 Micro 条码查询</h1>
+<hr/>
+<br>
+Micro P/N :
+<input type="text" id="microlot" maxLength="10" onkeyup="this.value=this.value.replace(/[\']*[\\]*[%]*[&]*/gi,'')"/>
+<input type="button" value="确定" onclick="getInfo()"/>
+
+
+<p id="result"></p>
+
+<script>
+    function getInfo(){
+        var microlot = $("#microlot").val();
+        if(microlot == ""){
+            $.messager.alert("提示", "请输入microlot");
+            return;
+        }
+        console.log(microlot);
+        $.get("/micro/getMicroInfoByMicrolot/"+microlot,function(result){
+            if(result.status == 200){
+
+                var map = result.data;
+                var lotNumber = map.lotNumber;
+                var microlots = map.microlots;
+
+                // 返回的结果文本内容
+                var content = "";
+                content += "<table>";
+                content += "<tr><td colspan='5'>&nbsp;</td></tr>";
+                content += "<tr><td colspan='5'>" + lotNumber + "</td></tr>";
+                content += "<tr><td colspan='5'>&nbsp;</td></tr>";
+                for(var i=0; i<microlots.length; i++){
+                    if(i%5==0 || i==0){
+                        content += "<tr>";
+                    }
+                    if(microlots[i] == microlot){
+                        content += "<td><span style='color:red'>" + microlots[i] + "</span>&nbsp;&nbsp;&nbsp;</td>";
+                    }else{
+                        content += "<td>" + microlots[i] + "&nbsp;&nbsp;&nbsp;</td>";
+                    }
+                    if((i+1)%5==0 && i!=0){
+                        content += "</tr>";
+                    }
+                }
+                content += "</table>";
+
+                $("#result").html(content);
+                $("#result").css({"color":"black"});
+            }else{
+                $("#result").html(result.msg);
+                $("#result").css({"color":"red"});
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

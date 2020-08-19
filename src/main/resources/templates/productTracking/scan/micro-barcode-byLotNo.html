@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/default/easyui.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/icon.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/demo/demo.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.easyui.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/locale/easyui-lang-zh_CN.js}"></script>
+</head>
+<body>
+
+<hr/>
+<h1>按 Lot No 查询</h1>
+<hr/>
+<br>
+Lot No. :
+<input type="text" id="lotNo" maxLength="12" onkeyup="this.value=this.value.replace(/[\']*[\\]*[%]*[&]*/gi,'').toUpperCase()">
+<input type="button" value="确定" onclick="getInfo()">
+<p id="result"></p>
+
+<script>
+    function getInfo(){
+        var lotNo = $("#lotNo").val();
+        if(lotNo == ""){
+            $.messager.alert("提示", "请输入Lot No.");
+            return;
+        }
+        $.get("/micro/getMicroInfoByLotNumber/"+lotNo,function(result){
+            if(result.status == 200){
+
+                var microResult = result.data;
+                // 返回的结果文本内容
+                var content = "";
+
+                // microlot相关返回结果
+                var microShippedCount = microResult.microShippedCount;
+                var microUnShippedCount = microResult.microUnShippedCount;
+                content += "<br><br><h2>出货记录</h2>";
+                content += "未出货数量：" + microShippedCount + "&nbsp;&nbsp;&nbsp;已出货数量：" + microUnShippedCount + "<br><br>";
+                /*content += "<table>" +
+                                "<tr>" +
+                                    "<td>LotNo</td>" +
+                                    "<td>数量</td>" +
+                                    "<td>扫描时间</td>" +
+                                    "<td>状态</td>" +
+                                "</tr>";
+                var microlots = microResult.microlots;
+                for(var i=0; i<microlots.length; i++){
+                    content +=
+                        "<tr>" +
+                            "<td>" + microlots[i].lotNumber + "</td>" +
+                            "<td>" + microlots[i].count + "</td>" +
+                            "<td>" + microlots[i].createTime + "</td>" +
+                            "<td>" + (microlots[i].gstatus==0?'<span style="color:green">未出货</span>':'<span style="color:red">已出货</span>') + "</td>" +
+                        "</tr>";
+                }*/
+                content +=
+                    "<table style='margin-left: 20px'>" +
+                        "<tr>" +
+                            "<td>LotNo(数量)</td>" +
+                        "</tr>";
+                var microlots = microResult.microlots;
+                for(var i=0; i<microlots.length; i++){
+                        if(i%5==0 || i==0){
+                            content += "<tr>";
+                        }
+                        content += "<td>" + microlots[i].lotNumber + "(" + microlots[i].count + ")" + "&nbsp;&nbsp;&nbsp;</td>";
+                        if((i+1)%5==0 && i!=0){
+                            content += "</tr>";
+                        }
+                }
+                content += "</table>";
+
+                // microlotRework相关返回结果
+                var microlotReworks = microResult.microlotReworks;
+                if(microlotReworks != null){
+                    content += "<br><br><h2>返工记录</h2>";
+                    for(var j=0; j<microlotReworks.length; j++){
+                        content += "返工时间：" + microlotReworks[j].createTime + "&nbsp;&nbsp;&nbsp;返工数量：" + microlotReworks[j].microReworkCount + "<br><br>";
+                        content +=
+                            "<table style='margin-left: 20px'>" +
+                                "<tr>" +
+                                    "<td>LotNo(数量)</td>" +
+                                "</tr>";
+                        var mrs = microlotReworks[j].microlotReworks;
+                        for(var z=0; z<mrs.length; z++){
+                            if(z%5==0 || z==0){
+                                content += "<tr>";
+                            }
+                            content += "<td>" + mrs[z].lotNumber + "(" + mrs[z].count + ")" + "&nbsp;&nbsp;&nbsp;</td>";
+                            if((z+1)%5==0 && z!=0){
+                                content += "</tr>";
+                            }
+                        }
+                        content += "</table><br>"
+                    }
+                }
+                $("#result").html(content);
+                $("#result").css({"color":"black"});
+            }else{
+                $("#result").html(result.msg);
+                $("#result").css({"color":"red"});
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

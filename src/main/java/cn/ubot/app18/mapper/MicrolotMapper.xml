@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ubot.app18.mapper.MicrolotMapper">
+
+    <resultMap id="microResultMap" type="cn.ubot.app18.pojo.Microlot">
+        <id column="LOTID" property="lotId" jdbcType="INTEGER"/>
+        <result column="LOT_NUMBER" property="lotNumber" jdbcType="VARCHAR"/>
+        <result column="MICROLOT" property="microlot" jdbcType="VARCHAR"/>
+        <result column="CREATETIME" property="createTime" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="GSTATUS" property="gStatus" jdbcType="INTEGER"/>
+        <result column="GCREATETIME" property="gCreateTime" jdbcType="VARCHAR"/>
+        <result column="Guser_id" property="gUserId" jdbcType="VARCHAR"/>
+        <result column="count" property="count"/>
+    </resultMap>
+
+    <resultMap id="microReworkResultMap" type="cn.ubot.app18.pojo.MicrolotRework">
+        <result column="LOT_NUMBER" property="lotNumber" jdbcType="VARCHAR"/>
+        <result column="MICROLOT" property="microlot" jdbcType="VARCHAR"/>
+        <result column="create_by" property="createBy" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="count" property="count"/>
+    </resultMap>
+
+    <select id="getMicro" resultMap="microResultMap">
+        select LOT_NUMBER,count(LOTID) as count,CREATETIME,GSTATUS from microlot where LOT_NUMBER like CONCAT(#{lotNumber},'%') group by LOT_NUMBER
+    </select>
+
+    <select id="getMicroShippedCount" resultType="Integer">
+        select count(LOTID) as count from microlot where LOT_NUMBER like CONCAT(#{lotNumber},'%') and GSTATUS = '0'
+    </select>
+
+    <select id="getMicroUnShippedCount" resultType="Integer">
+        select count(LOTID) as count from microlot where LOT_NUMBER like CONCAT(#{lotNumber},'%') and GSTATUS = '1'
+    </select>
+
+    <select id="getMicroReworkDates" resultType="String">
+        select DISTINCT create_time from microlot_rework where LOT_NUMBER like CONCAT(#{lotNumber},'%') ORDER BY create_time desc
+    </select>
+
+    <select id="getMicroRework" resultMap="microReworkResultMap">
+        select LOT_NUMBER,count(LOTID) as count from microlot_rework where LOT_NUMBER like CONCAT(#{lotNumber},'%') and create_time = #{createTime} group by LOT_NUMBER
+    </select>
+
+    <select id="getMicroReworkCount" resultType="Integer">
+        select count(LOTID) as count from microlot_rework where LOT_NUMBER like CONCAT(#{lotNumber},'%') and create_time = #{createTime}
+    </select>
+
+    <select id="getLotNumber" resultType="String">
+        select LOT_NUMBER from microlot where microlot = #{microlot}
+    </select>
+
+    <select id="getMicrolots" resultType="String">
+        select MICROLOT from microlot where LOT_NUMBER = #{lotNumber}
+    </select>
+
+</mapper>
