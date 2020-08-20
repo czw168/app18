@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <meta charset="UTF-8">
     <title>Index</title>
@@ -11,35 +11,52 @@
     <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/locale/easyui-lang-zh_CN.js}"></script>
 </head>
 <body class="easyui-layout">
-<div data-options="region:'north',border:false" style="height:45px;padding:10px;">UBoT管理系统&nbsp;&nbsp;当前用户：[${user.userId}]&nbsp;&nbsp;<input type="button" value="注销" onclick="loginOut()"/></div>
+    <div data-options="region:'north',border:false" style="height:45px;padding:10px;">UBoT管理系统&nbsp;&nbsp;当前用户：[<shiro:principal/>]&nbsp;&nbsp;<input type="button" value="注销" onclick="loginOut()"/></div>
 
-<div data-options="region:'west',title:'菜单',split:true" style="width:200px;">
-    <div style="margin-top: 10px;margin-left: 10px;">
-        <ul id="menu" class="easyui-tree" style="margin-top: 10px;margin-left: 5px;">
-            <li>
-                <span>产品跟踪管理</span>
-                <ul>
-                    <li>
-                        <span>条码扫描</span>
-                        <ul>
-                            <li data-options="attributes:{'url':'/productTracking/scan/micro-barcode'}">Micro条码</li>
-                            <li data-options="attributes:{'url':'${pageContext.request.contextPath}/productTracking/scan/micro-rework'}">Micro出仓返工</li>
-                            <li data-options="attributes:{'url':'${pageContext.request.contextPath}/productTracking/scan/micro-scan'}">装箱扫描</li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-    </div>
-</div>
-
-<div data-options="region:'center',title:''">
-    <div id="tabs" class="easyui-tabs" style="height:100%;">
-        <div id="index" title="首页" style="padding:20px;">
-            <h1>欢迎使用</h1>
+    <div data-options="region:'west',title:'菜单',split:true" style="width:200px;">
+        <div style="margin-top: 10px;margin-left: 10px;">
+            <ul id="menu" class="easyui-tree" style="margin-top: 10px;margin-left: 5px;">
+                <li shiro:hasRole="admin">
+                    <span>功能模块</span>
+                    <ul>
+                        <li>
+                            <span>用户管理</span>
+                            <ul>
+                                <li data-options="attributes:{'url':'/functionModule/user/user-list'}">用户管理</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <span>日志管理</span>
+                            <ul>
+                                <li data-options="attributes:{'url':'/functionModule/log/log-list'}">日志管理</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li shiro:hasAnyRoles="admin,product">
+                    <span>产品跟踪管理</span>
+                    <ul>
+                        <li>
+                            <span>条码扫描</span>
+                            <ul>
+                                <li data-options="attributes:{'url':'/productTracking/scan/micro-barcode'}">Micro条码</li>
+                                <li data-options="attributes:{'url':'${pageContext.request.contextPath}/productTracking/scan/micro-rework'}">Micro出仓返工</li>
+                                <li data-options="attributes:{'url':'${pageContext.request.contextPath}/productTracking/scan/micro-scan'}">装箱扫描</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
-</div>
+
+    <div data-options="region:'center',title:''">
+        <div id="tabs" class="easyui-tabs" style="height:100%;">
+            <div id="index" title="首页" style="padding:20px;">
+                <h1>欢迎使用</h1>
+            </div>
+        </div>
+    </div>
 
 <script type="text/javascript">
 
@@ -84,14 +101,13 @@
     //     });
     // }
 
-    //注销
-    // function loginOut(){
-    //     $.post("${pageContext.request.contextPath}/user/loginOut", function(result){
-    //         if(result.status == 200){
-    //             location.href = "${pageContext.request.contextPath}";
-    //         }
-    //     });
-    // }
+    // 注销
+    function loginOut(){
+        $.post("/user/loginOut", function(result){
+            console.log(result);
+            location.href = "http://localhost:8888/";
+        });
+    }
 
 </script>
 

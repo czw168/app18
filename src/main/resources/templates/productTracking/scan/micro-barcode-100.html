@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/default/easyui.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/icon.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/demo/demo.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.easyui.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/locale/easyui-lang-zh_CN.js}"></script>
+</head>
+<body>
+
+<hr/>
+<h1>Micro扫描(4x25片)</h1>
+<hr/>
+<br>
+<!--Lot No. :-->
+<!--<input type="text" id="lotNumber" maxLength="12" onkeyup="this.value=this.value.replace(/[\']*[\\]*[%]*[&]*/gi,'').toUpperCase()">-->
+<!--<input type="button" value="确定" onclick="checkLotNumber()">&nbsp;&nbsp;<span id="msg"></span>-->
+
+<table class="table">
+    <tr>
+        <td colspan="7">
+            Lot No. :
+            <input type="text" id="lotNumber" maxLength="12" onkeyup="checkLotNumber(this.value=this.value.replace(/[\']*[\\]*[%]*[&]*/gi,'').toUpperCase())">
+            <span id="msg"></span>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="7">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+            <textarea rows="27" cols="20" id="microlot1" disabled="disabled"></textarea>
+            <input type="button" class="sub" value=" 校验 " id="checkMicrolot1" onClick="checkMicrolot1()" disabled="disabled" /><br/>
+        </td>
+        <td>&nbsp;&nbsp;&nbsp;</td>
+        <td>
+            <textarea rows="27" cols="20" id="microlot2" disabled="disabled"></textarea>
+            <input type="button" class="sub" value=" 校验 " id="checkMicrolot2" onClick="checkMicrolot2()" disabled="disabled"/><br/>
+        </td>
+        <td>&nbsp;&nbsp;&nbsp;</td>
+        <td>
+            <textarea rows="27" cols="20" id="microlot3" disabled="disabled"></textarea>
+            <input type="button" class="sub" value=" 校验 " id="checkMicrolot3" onClick="checkMicrolot3()" disabled="disabled"/><br/>
+        </td>
+        <td>&nbsp;&nbsp;&nbsp;</td>
+        <td>
+            <textarea rows="27" cols="20" id="microlot4" disabled="disabled"></textarea>
+            <input type="button" class="sub" value=" 校验 " id="checkMicrolot4" onClick="checkMicrolot4()" disabled="disabled"/><br/>
+        </td>
+    </tr>
+    <tr>
+        <td valign="top"><span id="microlot1Msg"></span></td>
+        <td>&nbsp;&nbsp;&nbsp;</td>
+        <td valign="top"><span id="microlot2Msg"></span></td>
+        <td>&nbsp;&nbsp;&nbsp;</td>
+        <td valign="top"><span id="microlot3Msg"></span></td>
+        <td>&nbsp;&nbsp;&nbsp;</td>
+        <td valign="top"><span id="microlot4Msg"></span></td>
+    </tr>
+</table>
+
+
+
+
+<script>
+
+    $(document).ready(function(){
+        $("#lotNumber").focus();
+    });
+
+    // 每个扫描框的扫描数量
+    var num = 25;
+    // 存放验证的 microlot
+    var microlots = new Array();
+
+    function checkLotNumber(){
+
+        var lotNumber = $("#lotNumber").val();
+        if(lotNumber == ""){
+            $.messager.alert("提示", "请输入Lot No.");
+            return;
+        }
+        if(lotNumber.substring(0,1) != "P"){
+            $.messager.alert("提示", "Lot No. 格式不符合!必须要以P开头");
+            return;
+        }
+        if(lotNumber.length != 12){
+            $.messager.alert("提示", "Lot No. 格式不符合!长度不足12");
+            return;
+        }
+
+        $.get("/micro/checkLotNumber/"+lotNumber,function(result){
+            if(result.status == 200){
+                $("#msg").html(result.msg);
+                $("#msg").css({"color":"green"});
+                // 禁用lotNumber扫描框
+                $("#lotNumber").attr('readonly',true);
+                // 开放第一个microlot扫描框
+                $("#microlot1").attr("disabled",false);
+                $("#checkMicrolot1").attr("disabled",false);
+                // 鼠标选中
+                $("#microlot1").focus();
+            }else{
+                $("#msg").html(result.msg);
+                $("#msg").css({"color":"red"});
+            }
+        });
+    }
+
+    function checkMicrolot1(){
+        var microlots = $("#microlot1").val();
+        if(null == microlots || "" == microlots){
+            $.messager.alert("提示", "请扫描microlot");
+            $("#microlot1").focus();
+            return;
+        }
+        // 去除所有空格
+        microlots = microlots.replace(/\s*/g,"");
+        // 查看数据库是否存在这些microlot
+        $.ajax({
+            type: 'POST',
+            url: "/micro/checkMicrolot/",
+            data:'{"microlotString":"'+microlots+'","num":"'+num+'"}',
+            dataType: "json",
+            contentType: "application/json;charset=UTF-8",
+            success: function(result){
+
+                if(result.status == 200){
+                    $("#microlot1Msg").css('color','green');
+                    $("#microlot1Msg").html(result.msg);
+                    // 禁用
+                    $("#microlot1").attr("readonly",true);
+                    $("#checkMicrolot1").attr("disabled",true);
+                    // 开启
+                    $("#microlot2").attr("disabled",false);
+                    $("#checkMicrolot2").attr("disabled",false);
+                    $("#microlot2").focus();
+                }else if(result.status == 402){
+                    $("#microlot1Msg").css('color','red');
+                    var existMicrolots = result.data;
+                    var str = "";
+                    for(var i=0; i<existMicrolots.length; i++){
+                        str += existMicrolots[i] + "<br>";
+                    }
+                    $("#microlot1Msg").html(result.msg + "<br>" + str);
+                }else{
+                    $("#microlot1Msg").css('color','red');
+                    $("#microlot1Msg").html(result.msg);
+                }
+
+            }
+        });
+
+        // $.get(url,function(result){
+        //     $("#microlot1Msg").html(result);
+        //
+        //     // if(result.indexOf("OK")!=-1){
+        //     //     $("#prodNo1Span").css('color','green');
+        //     //     $("#prodNo1").attr("readonly",true);
+        //     //     $("#check1").attr("disabled",true);
+        //     //     $("#prodNo2").attr("disabled",false);
+        //     //     $("#check2").attr("disabled",false);
+        //     //     $("#prodNo2").focus();
+        //     //     // 分割prod No
+        //     //     var j = 0;
+        //     //     for(var i=0;i<prodNo.length/10;i++){
+        //     //         var substring = prodNo.substring(j, (j+10));
+        //     //         // 添加到数组
+        //     //         array1.push(substring);
+        //     //         j += 10;
+        //     //     }
+        //     // }
+        //
+        // });
+    }
+
+</script>
+
+</body>
+</html>

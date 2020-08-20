@@ -70,4 +70,18 @@ public interface MicrolotMapper {
      */
     List<String> getMicrolots(String lotNumber);
 
+    /**
+     * 查看是否存在此LotNo
+     * @param lotNumber
+     * @return
+     */
+    String checkLotNumber(String lotNumber);
+
+    /**
+     * 查看是否存在此microlot
+     * @param micorlot
+     * @return
+     */
+    String checkMicrolot(String micorlot);
+
 }

@@ -55,4 +55,12 @@
         select MICROLOT from microlot where LOT_NUMBER = #{lotNumber}
     </select>
 
+    <select id="checkLotNumber" resultType="String">
+        select LOT_NUMBER from microlot where LOT_NUMBER = #{lotNumber} limit 1
+    </select>
+
+    <select id="checkMicrolot" resultType="String">
+        select MICROLOT from microlot where MICROLOT = #{microlot}
+    </select>
+
 </mapper>

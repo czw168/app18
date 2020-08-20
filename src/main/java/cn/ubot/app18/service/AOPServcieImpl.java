@@ -2,8 +2,10 @@ package cn.ubot.app18.service;
 
 import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Service;
 
@@ -22,15 +24,15 @@ public class AOPServcieImpl implements AOPServcie{
     @Resource
     private HttpServletRequest request;
 
-    @Pointcut("execution(public * cn.ubot.app18.controller.*.*(..)))")
+    @Pointcut("execution(public * cn.ubot.app18.service.*.*(..)))")
     public void brokerAspect(){
 
     }
 
     @Override
-    @After("brokerAspect()")
+    @Before("brokerAspect()")
     public void addlog() {
-        log.info("======================== 当前时间【" + DateUtil.date() + "】\t请求路径【" + request.getServletPath() + "】");
+        log.info("==> 用户【" + SecurityUtils.getSubject().getPrincipal() + "】\t时间【" + DateUtil.date() + "】\tIP【" + request.getRemoteAddr() + "】\tURL【" + request.getServletPath() + "】");
     }
 
     public static void main(String[] args) {

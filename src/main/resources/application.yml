@@ -6,7 +6,7 @@ spring:
   datasource:
     username: root
     password: '%TGB6yhn'
-    url: jdbc:mysql://192.168.4.97:3306/adms?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mysql://192.168.4.97:3306/adms2?useUnicode=true&characterEncoding=UTF-8
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
@@ -32,9 +32,9 @@ spring:
   thymeleaf:
     cache: false
 
-#  redis:
-#    host: 192.168.4.97
-#    port: 6379
+  redis:
+    host: 192.168.4.97
+    port: 6379
 
 
 mybatis:

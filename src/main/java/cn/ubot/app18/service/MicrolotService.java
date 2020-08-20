@@ -22,4 +22,19 @@ public interface MicrolotService {
      */
     AjaxResult getMicroInfoByMicrolot(String microlot);
 
+    /**
+     * 查看是否存在此LotNo
+     * @param lotNumber
+     * @return
+     */
+    AjaxResult checkLotNumber(String lotNumber);
+
+    /**
+     * microlot扫描校验
+     * @param micorlotString
+     * @param num
+     * @return
+     */
+    AjaxResult checkMicrolot(String micorlotString, Integer num);
+
 }

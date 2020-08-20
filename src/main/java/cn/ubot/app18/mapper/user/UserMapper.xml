@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ubot.app18.mapper.user.UserMapper">
+
+    <resultMap id="userResultMap" type="cn.ubot.app18.pojo.user.User">
+        <id column="id" property="id"/>
+        <result column="name" property="name" />
+        <result column="password" property="password" />
+        <result column="salt" property="salt" />
+        <result column="status" property="status" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <resultMap id="permissionResultMap" type="cn.ubot.app18.pojo.user.Permission">
+        <id column="id" property="id"/>
+        <result column="name" property="name" />
+        <result column="desc_" property="desc" />
+        <result column="url" property="url" />
+    </resultMap>
+
+    <resultMap id="roleResultMap" type="cn.ubot.app18.pojo.user.Role">
+        <id column="id" property="id"/>
+        <result column="name" property="name" />
+        <result column="desc_" property="desc" />
+    </resultMap>
+
+    <select id="getUsers" resultType="User">
+        SELECT * FROM user
+    </select>
+
+    <select id="getUser" resultMap="userResultMap">
+        select id,name,password,salt,status,create_time,update_time from user where name = #{name}
+    </select>
+
+    <select id="getRole" resultMap="roleResultMap">
+        select ur.rid as id,r.name,r.desc_ from user u
+        left join user_role ur on u.id = ur.uid
+        left join role r on ur.rid = r.id
+        where u.name = #{name}
+    </select>
+
+    <select id="getPermissions" resultMap="permissionResultMap">
+        select p.name,p.desc_,p.url from permission p left join role_permission rp on p.id = rp.pid where rp.rid = #{roleId}
+    </select>
+
+<!--    <select id="register">-->
+<!--        insert into user (`name`,`password`,`salt`,`status`,`create_time`) values (#{name},#{password},#{salt},#{status},#{createTime})-->
+<!--    </select>-->
+
+</mapper>

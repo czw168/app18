@@ -1,34 +1,118 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <title>Title</title>-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>UBoT</title>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.easyui.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/locale/easyui-lang-zh_CN.js}"></script>
+    <style type="text/css">
+        body{
+            font-family:Arial;
+            background-color: #d5e1f9;
+        }
+        div{
+            height: 400px;
+            position:absolute;
+            left:0;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            margin: auto;
+        }
+    </style>
+</head>
 
-<!--    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/default/easyui.css}" />-->
-<!--    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/icon.css}" />-->
-<!--    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/demo/demo.css}" />-->
-<!--    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.min.js}"></script>-->
-<!--    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.easyui.min.js}"></script>-->
-<!--    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/locale/easyui-lang-zh_CN.js}"></script>-->
-<!--    &lt;!&ndash;<script type="text/javascript" th:src="@{/static/js/jquery.serializejson.js}"></script>&ndash;&gt;-->
+<body onkeydown="keyLogin();">
 
-<!--</head>-->
-<!--<body>-->
+    <h2>UBoT System</h2><hr/>
+    <div>
+        <form id="loginForm" method="post" onsubmit="return false;">
+            <table  align="center">
+                <tr colspan="2">
+                    <td><h3>欢迎登录</h3></td>
+                </tr>
+                <tr>
+                    <td>用户名</td>
+                    <td><input type="text" name="name" id="name"/></td>
+                </tr>
+                <tr>
+                    <td>密&nbsp;&nbsp;&nbsp;码</td>
+                    <td><input type="password" name="password" id="password"/></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><input type="button" id="loginSubmit" value="登录"/></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><span id="msg" style="color: red"></span></td>
+                </tr>
+            </table>
+        </form>
+    </div>
 
-<!--    <h1>Login</h1>-->
+<script type="text/javascript">
 
-<!--    <form th:action="@{/user/login}" method="post">-->
-<!--        name:<input class="easyui-textbox" name="name"/><br>-->
-<!--        password:<input class="easyui-textbox" name="password"/><br>-->
-<!--        <input class="easyui-textbox" type="submit" value="提交"/><br>-->
-<!--    </form>-->
+    window.onload=function(){
+        if(window !=top){
+            top.location.href = location.href;
+        }
+        $("#name").focus();
+    }
 
+    function keyLogin(){
+        //回车键的键值为13
+        if (event.keyCode==13) {
+            //调用登录按钮的登录事件
+            $("#loginSubmit").click();
+        }
+    }
 
-<!--    <a th:href="@{/register}">去注册</a>-->
+    var LOGIN = {
+        checkInput:function() {
+            if ($("#name").val() == "") {
+                $("#msg").html("用户名不能为空");
+                $("#name").focus();
+                return false;
+            }
+            if ($("#password").val() == "") {
+                $("#msg").html("密码不能为空");
+                $("#password").focus();
+                return false;
+            }
+            return true;
+        },
+        doLogin:function() {
+            $.ajax({
+                type: 'POST',
+                url: "/user/loginto",
+                data:'{"name":"'+$("#name").val()+'","password":"'+$("#password").val()+'"}',
+                dataType: "json",
+                contentType: "application/json;charset=UTF-8",
+                success: function(result){
+                    if (result.status == 200) {
+                        location.href = "/index";
+                    } else {
+                        $("#msg").html(result.msg);
+                        $("#name").select();
+                    }
+                }
+            });
+        },
+        login:function() {
+            if (this.checkInput()) {
+                this.doLogin();
+            }
+        }
+    };
+    $(function(){
+        $("#loginSubmit").click(function(){
+            LOGIN.login();
+        });
+    });
 
+</script>
 
-
-
-
-<!--</body>-->
-<!--</html>-->
+</body>
+</html>
