@@ -24,7 +24,7 @@ public class AOPServcieImpl implements AOPServcie{
     @Resource
     private HttpServletRequest request;
 
-    @Pointcut("execution(public * cn.ubot.app18.service.*.*(..)))")
+    @Pointcut("execution(public * cn.ubot.app18.service..*.*(..))")
     public void brokerAspect(){
 
     }

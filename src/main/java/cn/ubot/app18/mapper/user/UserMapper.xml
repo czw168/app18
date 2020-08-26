@@ -11,6 +11,18 @@
         <result column="status" property="status" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
+<!--        <association property="roles" javaType="list" resultMap="roleResultMap"></association>-->
+        <collection property="roles" javaType="list" ofType="Role">
+            <id column="rid" property="id"/>
+            <result column="rname" property="name"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="roleResultMap" type="cn.ubot.app18.pojo.user.Role">
+        <id column="rid" property="id"/>
+        <result column="rname" property="name" />
+        <result column="desc_" property="desc" />
+<!--        <association property="permissions" javaType="list" resultMap="permissionResultMap"></association>-->
     </resultMap>
 
     <resultMap id="permissionResultMap" type="cn.ubot.app18.pojo.user.Permission">
@@ -20,33 +32,95 @@
         <result column="url" property="url" />
     </resultMap>
 
-    <resultMap id="roleResultMap" type="cn.ubot.app18.pojo.user.Role">
-        <id column="id" property="id"/>
-        <result column="name" property="name" />
-        <result column="desc_" property="desc" />
-    </resultMap>
-
-    <select id="getUsers" resultType="User">
-        SELECT * FROM user
-    </select>
-
-    <select id="getUser" resultMap="userResultMap">
+    <select id="getUserByName" resultMap="userResultMap">
         select id,name,password,salt,status,create_time,update_time from user where name = #{name}
     </select>
 
-    <select id="getRole" resultMap="roleResultMap">
-        select ur.rid as id,r.name,r.desc_ from user u
-        left join user_role ur on u.id = ur.uid
-        left join role r on ur.rid = r.id
-        where u.name = #{name}
+    <select id="getRolesByName" resultMap="roleResultMap">
+        SELECT r.id rid,r.name rname
+              FROM user u
+              LEFT JOIN user_role ur
+              ON u.id = ur.uid
+              LEFT JOIN role r
+              ON ur.rid = r.id
+              WHERE u.name = #{name}
     </select>
 
-    <select id="getPermissions" resultMap="permissionResultMap">
+    <select id="getPermissionsByRoleId" resultMap="permissionResultMap">
         select p.name,p.desc_,p.url from permission p left join role_permission rp on p.id = rp.pid where rp.rid = #{roleId}
     </select>
 
-<!--    <select id="register">-->
-<!--        insert into user (`name`,`password`,`salt`,`status`,`create_time`) values (#{name},#{password},#{salt},#{status},#{createTime})-->
-<!--    </select>-->
+    <select id="getUsers" resultMap="userResultMap">
+        select id,name,status,create_time,update_time from user
+    </select>
+
+    <select id="getPermissions" resultMap="permissionResultMap">
+        select id,name,desc_,url from permission ORDER BY name asc
+    </select>
+
+    <select id="getRoles" resultMap="roleResultMap">
+        select id rid,name rname,desc_ from role
+    </select>
+
+    <insert id="addPermission" >
+        insert into permission (name,desc_,url) values (#{name},#{desc},#{url})
+    </insert>
+
+    <delete id="deletePermissionById">
+        delete from permission where id = #{id}
+    </delete>
+
+    <insert id="addRole" useGeneratedKeys="true" keyProperty="id">
+        insert into role (name,desc_) value (#{name},#{desc})
+    </insert>
+
+    <insert id="addRolePermission">
+        insert into role_permission (rid,pid) values
+        <foreach item="pid" collection="pids" separator=",">
+            (#{rid},#{pid})
+        </foreach>
+    </insert>
+
+    <update id="updateRole">
+        update role set desc_ = #{desc} where id = #{id}
+    </update>
+
+    <delete id="deletePermissionByRid">
+        delete from role_permission where rid = #{rid}
+    </delete>
+
+    <delete id="deleteRole">
+        delete from role where id = #{id}
+    </delete>
+
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="id">
+        insert into user (name,password,salt,status,create_time) values (#{name},#{password},#{salt},#{status},#{createTime})
+    </insert>
+
+    <insert id="addUserRole">
+        insert into user_role (uid,rid) values
+        <foreach item="rid" collection="rids" separator=",">
+            (#{uid},#{rid})
+        </foreach>
+    </insert>
+
+    <delete id="deleteUser">
+        delete from user where id = #{id}
+    </delete>
+
+    <insert id="deleteUserRole">
+        delete from user_role where uid = #{uid}
+    </insert>
+
+    <update id="updateUser">
+        update user
+        <trim prefix="set" suffixOverrides="," suffix="where id = #{id}">
+            <if test="password!=null and password!=''">password=#{password},</if>
+            <if test="salt!=null and salt!=''">salt=#{salt},</if>
+            <if test="status!=null">status=#{status},</if>
+            <if test="updateTime!=null">update_time=#{updateTime},</if>
+        </trim>
+    </update>
+
 
 </mapper>

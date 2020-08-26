@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div style="margin: 10px">
+    <form id="roleEditFrom">
+        <input type="hidden" name="id"/>
+        <input type="hidden" name="permissions" id="edit_permissions"/>
+        <table>
+            <tr>
+                <td>角色 : </td>
+                <td><input class="easyui-textbox" name="name" id="edit_name" style="width: 200px" data-options="readonly:true"></td>
+            </tr>
+            <tr>
+                <td>详情 : </td>
+                <td><input class="easyui-textbox" name="desc" style="width: 200px" data-options=""></td>
+            </tr>
+            <tr>
+                <td>权限 : </td>
+                <td>
+                    <a href="#" class="easyui-linkbutton" onclick="setAll()">全选</a>
+                    <a href="#" class="easyui-linkbutton" onclick="setOthers()">反选</a>
+                </td>
+            </tr>
+            <tr><td colspan="2" id="edit_permissionResult"></td></tr>
+        </table>
+    </form>
+
+    <div>
+        <a href="javascript:" class="easyui-linkbutton" onclick="submitForm()" style="width: 80px">提交</a>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function(){
+        $.ajax({
+            url: '/user/permissions',
+            type: "get",
+            contentType: "application/json;charset=UTF-8",
+            success: function (result) {
+                var str = "";
+                var permissions = result.rows;
+                str += '<div style="margin-bottom: 20px">';
+                for(var i in permissions){
+                    var pnl = $("#edit_permissions").val();
+                    if(pnl.includes(permissions[i].name)){
+                        str += '<input type="checkbox" name="permissionName" value="' + permissions[i].id + '" checked="true" >&nbsp;'
+                    }else{
+                        str += '<input type="checkbox" name="permissionName" value="' + permissions[i].id + '">&nbsp;'
+                    }
+                    str += '<label>' + permissions[i].name + '</label><br>';
+                }
+                str += '</div>';
+
+                $("#edit_permissionResult").append(str);
+
+                $.parser.parse($('#edit_permissionResult'));
+            }
+        });
+
+    });
+
+    // 全选
+    function setAll() {
+        var p = document.getElementsByName("permissionName");
+        for (var i = 0; i < p.length; i++) {
+            p[i].checked = true;
+        }
+    }
+
+    // 反选
+    function setOthers() {
+        var p = document.getElementsByName("permissionName");
+        for (var i = 0; i < p.length; i++) {
+            if (p[i].checked == false){
+                p[i].checked = true;
+            }else{
+                p[i].checked = false;
+            }
+        }
+    }
+
+    function submitForm(){
+        var validate = $("#roleEditFrom").form('validate');
+        if (!validate) {
+            $("#roleEditFrom").find(".validatebox-invalid:first").focus();
+            return false;
+        }
+
+        var id = $("input[name='id']").val();
+        var desc = $("input[name='desc']").val();
+
+        var pids = [];
+        $("input[name='permissionName']:checked").each(function(i){
+            pids.push($(this).val());
+        });
+
+        $.ajax({
+            url: '/user/roles',
+            type: "put",
+            data: '{"id":"'+id+'","desc":"'+desc+'","pids":'+JSON.stringify(pids)+'}',
+            contentType: "application/json;charset=UTF-8",
+            success: function (result) {
+                if(result.status == 200){
+                    $.messager.alert("提示", result.msg);
+                    $('#roleList').datagrid('reload');
+                    $('#roleEditWindow').window('close');
+                }else{
+                    $.messager.alert("提示", "修改失败！原因：<br>" + result.msg);
+                }
+            }
+        });
+
+    }
+</script>

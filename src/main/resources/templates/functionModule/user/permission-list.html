@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>权限列表</title>
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/default/easyui.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/icon.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/demo/demo.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.easyui.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/locale/easyui-lang-zh_CN.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.serializejson.js}"></script>
+</head>
+<body>
+    <div style="margin-left: 5px;margin-top: 5px">
+        <table id="permissionList"></table>
+    </div>
+    <div id="permissionAddWindow" class="easyui-window" title="权限新增" data-options="closed:true,iconCls:'icon-save',href:'./permission-add'" style="width:500px;height:400px;padding:10px;"></div>
+
+    <script type="text/javascript" th:inline="none">
+        $(document).ready(function(){
+            $('#permissionList').datagrid({
+                title: '',
+                width:600,
+                border:true,
+                url:"/user/permissions",
+                columns:[[
+                    {field:'id',title:'id',hidden:true},
+                    {field:'name',title:'权限',halign:'center',align:'left',width:200,
+                        formatter: function (val, row) {
+                            return "&nbsp;&nbsp;&nbsp;" + val;
+                        }
+                    },
+                    {field:'desc',title:'详情',align:'center',width:200},
+                ]],
+                pagination:true,					//如果表格需要支持分页，必须设置该选项为true
+                pageSize:20,   						//表格中每页显示的行数
+                pageList:[5,10,15,20],				//自定义表格选择要显示的行数
+                rownumbers:true,   					//是否显示行号
+                nowrap: false,
+                striped: true,  					//奇偶行是否使用不同的颜色
+                method:'get',  						//表格数据获取方式,请求地址是上面定义的url
+                singleSelect:true,					//设置单选
+                idField: 'id',						//表明该列是一个唯一列
+                //loadMsg:'Data Loading...',   		//加载数据时显示提示信息
+                frozenColumns: [[  					//固定在表格左侧的栏
+                    {field: 'ck', checkbox: true},
+                ]],
+                toolbar: [{
+                    text:'新增',
+                    iconCls:'icon-add',
+                    handler:function(){
+                        $("#permissionAddWindow").window().window("open");
+                    }
+                }, {
+                    text:'删除',
+                    iconCls:'icon-cancel',
+                    handler:function(){
+                        var ids = $("#permissionList").datagrid("getSelections");
+                        if(ids.length == 0){
+                            $.messager.alert('提示','请选择一条数据！');
+                            return;
+                        }
+                        $.messager.confirm('提示','确认删除？',function(r) {
+                            if (r) {
+                                var data = $("#permissionList").datagrid("getSelections")[0];
+                                $.ajax({
+                                    url: '/user/permissions',
+                                    type: "delete",
+                                    data: '{"id":"'+data.id+'"}',
+                                    contentType: "application/json;charset=UTF-8",
+                                    success: function (result) {
+                                        if(result.status == 200){
+                                            $.messager.alert("提示", result.msg);
+                                            $('#permissionList').datagrid('reload');
+                                        }else{
+                                            $.messager.alert("提示", "删除失败！原因：<br>" + result.msg);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }]
+            });
+        });
+
+    </script>
+</body>
+</html>

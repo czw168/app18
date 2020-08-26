@@ -51,6 +51,17 @@ public class PageController {
     }
 
     /**
+     * 功能模块-用户管理
+     * @param page
+     * @return
+     */
+    @GetMapping("/functionModule/user/{page}")
+    @RequiresRoles("admin")
+    public String functionModelUser(@PathVariable("page") String page){
+        return "/functionModule/user/" + page;
+    }
+
+    /**
      * 产品跟踪-条码扫描
      * @param page
      * @return

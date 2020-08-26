@@ -72,12 +72,12 @@
     var LOGIN = {
         checkInput:function() {
             if ($("#name").val() == "") {
-                $("#msg").html("用户名不能为空");
+                $("#msg").html("请输入用户名！");
                 $("#name").focus();
                 return false;
             }
             if ($("#password").val() == "") {
-                $("#msg").html("密码不能为空");
+                $("#msg").html("请输入密码！");
                 $("#password").focus();
                 return false;
             }

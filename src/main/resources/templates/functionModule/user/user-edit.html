@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div style="margin: 10px" align="center">
+    <form id="userEditFrom">
+        <input type="hidden" name="id" >
+        <table>
+            <tr>
+                <td>用户名 : </td>
+                <td><input class="easyui-textbox" name="name" id="edit_name" style="width: 280px" readonly="readonly" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>密码 : </td>
+                <td><input class="easyui-passwordbox" prompt="为空值代表不修改密码" id="edit_password" name="password" iconWidth="28" style="width:280px"></td>
+            </tr>
+            <tr>
+                <td>确认密码 : </td>
+                <td><input class="easyui-passwordbox" iconWidth="28" style="width:280px" id="edit_password2" validType="confirmPass['#edit_password']"></td>
+            </tr>
+            <tr>
+                <td>角色 : </td>
+                <td><input class="easyui-combobox" id="edit_roleId" style="width: 280px" data-options="valueField:'id',textField:'text',url:'/user/roleNames',method:'get',multiple:true,editable:false,required:true" /></td>
+            </tr>
+            <tr>
+                <td>状态 : </td>
+                <td>
+                    <input class="easyui-radiobutton" name="status" value="1" label="Enabled:" />
+                    &nbsp;&nbsp;&nbsp;
+                    <input class="easyui-radiobutton" name="status" value="0" label="Disabled:" />
+                </td>
+                <!-- <td><input class="easyui-combobox" name="roleId" data-options="valueField:'id',textField:'text',url:'listRoleName',editable:false,required:true" style="width: 200px" ></td> -->
+            </tr>
+        </table>
+    </form>
+
+    <div style="margin-top: 20px">
+        <a href="javascript:" class="easyui-linkbutton" onclick="submitForm()" style="width: 80px">Submit</a>
+        &nbsp;&nbsp;
+        <a href="javascript:" class="easyui-linkbutton" onclick="clearForm()" style="width: 80px">Clear</a>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    function submitForm(){
+        var validate = $("#userEditFrom").form('validate');
+        if (!validate) {
+            $("#userEditFrom").find(".validatebox-invalid:first").focus();
+            return false;
+        }
+
+        if($('#edit_password').val() != "" && $('#edit_password2').val() == ""){
+            $.messager.alert("提示", "两次输入的密码不匹配");
+            return false;
+        }
+
+        //var name = $("input[name='name']").val();
+        //var password = $("input[name='password']").val();
+        var rids = $("#edit_roleId").combobox("getValues");
+
+        $.ajax({
+            url: '/user/users',
+            type: "Put",
+            //data: '{"user":'+JSON.stringify($("#userEditFrom").serializeJSON())+',"rids":'+JSON.stringify(rids)+'}',
+            data: '{"user":' + JSON.stringify($("#userEditFrom").serializeJSON()) + ',"rids":' + JSON.stringify(rids) + '}',
+            contentType: "application/json;charset=UTF-8",
+            success: function (result) {
+                if(result.status == 200){
+                    $.messager.alert("提示", result.msg);
+                    $('#userList').datagrid('reload');
+                    $('#userEditWindow').window('close');
+                }else{
+                    $.messager.alert("提示", "新增失败！原因：<br>" + result.msg);
+                }
+            }
+        });
+
+        // $.ajax({
+        //     url: '/user/users',
+        //     type: "Put",
+        //     data: JSON.stringify($("#userEditFrom").serializeJSON()),
+        //     contentType: "application/json;charset=UTF-8",
+        //     success: function (result) {
+        //         if(result.status == 200){
+        //             $.messager.alert("提示", result.msg);
+        //             $('#userList').datagrid('reload');
+        //             $('#userEditWindow').window('close');
+        //         }else{
+        //             $.messager.alert("提示", "新增失败！原因：<br>" + result.msg);
+        //         }
+        //     }
+        // });
+
+    }
+
+    function clearForm(){
+        $('#userEditFrom').form('clear');
+    }
+
+</script>

@@ -11,36 +11,130 @@ import java.util.List;
 public interface UserMapper {
 
     /**
-     * 获取所有用户
-     * @return
-     */
-    List<User> getUsers();
-
-    /**
      * 根据用户名获取用户信息
      * @param name
      * @return
      */
-    User getUser(@Param("name") String name);
+    User getUserByName(@Param("name") String name);
 
     /**
-     * 根据用户名获取角色信息
+     * 获取当前用户下的所有角色
      * @param name
      * @return
      */
-    Role getRole(@Param("name") String name);
+    List<Role> getRolesByName(@Param("name") String name);
 
     /**
      * 根据角色ID获取权限
      * @param roleId
      * @return
      */
-    List<Permission> getPermissions(Long roleId);
+    List<Permission> getPermissionsByRoleId(@Param("roleId") Long roleId);
 
     /**
-     * 注册（添加用户）
-     * @param user
+     * 获取所有用户信息
+     * @return
      */
-    //void register(User user);
+    List<User> getUsers();
+
+    /**
+     * 获取所有权限
+     * @return
+     */
+    List<Permission> getPermissions();
+
+    /**
+     * 获取所有角色
+     * @return
+     */
+    List<Role> getRoles();
+
+    /**
+     * 新增权限
+     * @param permission
+     */
+    Integer addPermission(Permission permission);
+
+    /**
+     * 根据主键id删除权限
+     * @param id
+     */
+    Integer deletePermissionById(Long id);
+
+    /**
+     * 新增角色
+     * @param role
+     * @return
+     */
+    Integer addRole(Role role);
+
+    /**
+     * 给角色分配权限
+     * @param rid
+     * @param pids
+     * @return
+     */
+    Integer addRolePermission(Long rid, List<Long> pids);
+
+    /**
+     * 修改角色
+     * @param role
+     * @return
+     */
+    Integer updateRole(Role role);
+
+    /**
+     * 根据角色Id删除权限
+     * @param rid
+     * @return
+     */
+    Integer deletePermissionByRid(Long rid);
+
+    /**
+     * 删除角色
+     * @param id
+     * @return
+     */
+    Integer deleteRole(Long id);
+
+    /**
+     * 新增用户
+     * @param user
+     * @return
+     */
+    Integer addUser(User user);
+
+    /**
+     * 给用户添加角色
+     * @param uid
+     * @param rids
+     * @return
+     */
+    Integer addUserRole(Long uid, List<Long> rids);
+
+    /**
+     * 删除用户
+     * @param id
+     * @return
+     */
+    Integer deleteUser(Long id);
+
+    /**
+     * 删除用户角色
+     * @param uid
+     * @return
+     */
+    Integer deleteUserRole(Long uid);
+
+    /**
+     * 修改用户
+     * @param user
+     * @return
+     */
+    Integer updateUser(User user);
+
+
+
+
 
 }

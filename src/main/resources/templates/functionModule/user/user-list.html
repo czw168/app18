@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>用户列表</title>
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/default/easyui.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/themes/icon.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{/js/jquery-easyui-1.7.2/demo/demo.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/jquery.easyui.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-easyui-1.7.2/locale/easyui-lang-zh_CN.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.serializejson.js}"></script>
+</head>
+<body>
+    <div style="margin-left: 5px;margin-top: 5px">
+        <table id="userList"></table>
+    </div>
+    <div id="userAddWindow" class="easyui-window" title="用户新增" data-options="closed:true,iconCls:'icon-save',href:'./user-add'" style="width:500px;height:400px;padding:10px;"></div>
+    <div id="userEditWindow" class="easyui-window" title="用户编辑" data-options="closed:true,iconCls:'icon-save',href:'./user-edit'" style="width:500px;height:400px;padding:10px;"></div>
+
+    <script type="text/javascript" th:inline="none">
+        $(document).ready(function(){
+            $('#userList').datagrid({
+                title: '',
+                width:1010,
+                border:true,
+                url:"/user/users",
+                columns:[[
+                    {field:'id',title:'id',hidden:true},
+                    {field:'name',title:'用户名',align:'center',width:200},
+                    {field:'roles.name',title:'角色',align:'center',width:200,formatter: function (val, rows) {
+                        var roles = rows.roles;
+                        var result = "";
+                        for(var i=0; i<roles.length; i++){
+                            result += roles[i].name + "<br>";
+                        }
+                        return result;
+                    }},
+                    {field:'createTime',title:'创建时间',align:'center',width:200},
+                    {field:'updateTime',title:'修改时间',align:'center',width:200},
+                    {field:'status',title:'状态',align:'center',width:150,
+                        formatter: function (val, row) {
+                            if(val == 1){
+                                return "<span style='color:green'>Enabled</span>";
+                            }else{
+                                return "<span style='color:red'>Disabled</span>";
+                            }
+                        }
+                    }
+                ]],
+                pagination:true,					//如果表格需要支持分页，必须设置该选项为true
+                pageSize:20,   						//表格中每页显示的行数
+                pageList:[5,10,15,20],				//自定义表格选择要显示的行数
+                rownumbers:true,   					//是否显示行号
+                nowrap: false,
+                striped: true,  					//奇偶行是否使用不同的颜色
+                method:'get',  						//表格数据获取方式,请求地址是上面定义的url
+                singleSelect:true,					//设置单选
+                idField: 'id',						//表明该列是一个唯一列
+                //loadMsg:'Data Loading...',   		//加载数据时显示提示信息
+                frozenColumns: [[  					//固定在表格左侧的栏
+                    {field: 'ck', checkbox: true},
+                ]],
+                toolbar: [{
+                    text:'新增',
+                    iconCls:'icon-add',
+                    handler:function(){
+                        $("#userAddWindow").window().window("open");
+                    }
+                }, {
+                    text:'编辑',
+                    iconCls:'icon-edit',
+                    handler:function(){
+                        var ids = $("#userList").datagrid("getSelections");
+                        if(ids.length == 0){
+                            $.messager.alert('提示','请选择一条数据！');
+                            return;
+                        }
+                        $("#userEditWindow").window({
+                            onLoad :function(){
+                                $('#edit_name').textbox('textbox').css('background','#ccc');
+                                // 获取所选行数据
+                                var data = $("#userList").datagrid("getSelections")[0];
+                                var roleid = "";
+                                var roles = data.roles;
+                                for(var i=0; i<roles.length; i++){
+                                    roleid += roles[i].id;
+                                    if(i != roles.length-1){
+                                        roleid += ",";
+                                    }
+                                }
+                                console.log(roleid);
+                                //回显数据
+                                $("#userEditFrom").form("load",data);
+                                //$('#edit_roleId').combobox('setValue',roleid);
+                                $('#edit_roleId').combobox('setValue',roleid.split(","));
+                            }
+                        }).window("open");
+                    }
+                }, {
+                    text:'删除',
+                    iconCls:'icon-cancel',
+                    handler:function(){
+                        var ids = $("#userList").datagrid("getSelections");
+                        if(ids.length == 0){
+                            $.messager.alert('提示','请选择一条数据！');
+                            return;
+                        }
+                        $.messager.confirm('提示','确认删除？',function(r) {
+                            if (r) {
+                                var data = $("#userList").datagrid("getSelections")[0];
+                                $.ajax({
+                                    url: '/user/users',
+                                    type: "delete",
+                                    data: '{"id":"'+data.id+'"}',
+                                    contentType: "application/json;charset=UTF-8",
+                                    success: function (result) {
+                                        if(result.status == 200){
+                                            $.messager.alert("提示", result.msg);
+                                            $('#userList').datagrid('reload');
+                                        }else{
+                                            $.messager.alert("提示", "新增失败！原因：<br>" + result.msg);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }]
+            });
+        });
+
+        // 表单验证方式
+        $.extend($.fn.validatebox.defaults.rules, {
+            // 只能输入数字和小数点
+            double_ : {
+                validator: function (value) {
+                    return /^\d+(\.\d+)?$/.test(value);
+                },
+                message: 'Please enter a valid number'
+            },
+            // 只能输入大写字母和数字
+            majusculeAndNumber : {
+                validator: function (value) {
+                    return /^[A-Z0-9]*$/.test(value);
+                },
+                message: 'Format error'
+            },
+            // 匹配两次输入的密码
+            confirmPass: {
+                validator: function(value, param){
+                    var pass = $(param[0]).passwordbox('getValue');
+                    return value == pass;
+                },
+                message: '两次输入的密码不匹配'
+            },
+            // 查看用户名是否存在
+            userName: {
+                validator: function(value, param){
+                    var name = "";
+                    $.ajax({
+                        type: 'get',
+                        url: "/user/"+value,
+                        dataType: "json",
+                        contentType: "application/json;charset=UTF-8",
+                        async:false,
+                        success: function(result){
+                            if(result.data != null){
+                                name = result.data.name;
+                            }
+                        }
+                    });
+                    return value != name
+                },
+                message: '用户名已存在'
+            }
+        })
+
+    </script>
+</body>
+</html>

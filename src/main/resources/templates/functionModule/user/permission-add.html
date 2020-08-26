@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div style="margin: 10px">
+    <form id="permissionAddFrom">
+        <div style="margin-bottom: 20px">
+            <input class="easyui-textbox" name="name" style="width: 200px" data-options="label:'Name:',required:true">
+        </div>
+        <div style="margin-bottom: 20px">
+            <input class="easyui-textbox" name="desc" style="width: 300px" data-options="label:'Desc:'">
+        </div>
+        <div style="margin-bottom: 20px">
+            <input class="easyui-textbox" name="url" style="width: 300px" data-options="label:'Url:'">
+        </div>
+    </form>
+
+    <div>
+        <a href="javascript:" class="easyui-linkbutton" onclick="submitForm()" style="width: 80px">提交</a>
+        &nbsp;&nbsp;
+        <a href="javascript:" class="easyui-linkbutton" onclick="clearForm()" style="width: 80px">重置</a>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function submitForm(){
+        var validate = $("#permissionAddFrom").form('validate');
+        if (!validate) {
+            $("#permissionAddFrom").find(".validatebox-invalid:first").focus();
+            return false;
+        }
+
+        $.ajax({
+            url: '/user/permissions',
+            type: "Post",
+            data: JSON.stringify($("#permissionAddFrom").serializeJSON()),
+            contentType: "application/json;charset=UTF-8",
+            success: function (result) {
+                if(result.status == 200){
+                    $.messager.alert("提示", result.msg);
+                    $('#permissionList').datagrid('reload');
+                    $('#permissionAddWindow').window('close');
+                }else{
+                    $.messager.alert("提示", "新增失败！原因：<br>" + result.msg);
+                }
+            }
+        });
+
+    }
+
+    function clearForm(){
+        $('#permissionAddFrom').form('clear');
+    }
+</script>

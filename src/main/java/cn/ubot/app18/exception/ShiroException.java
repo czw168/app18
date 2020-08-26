@@ -2,6 +2,7 @@ package cn.ubot.app18.exception;
 
 import cn.hutool.json.JSONUtil;
 import cn.ubot.app18.common.AjaxResult;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -32,7 +33,7 @@ public class ShiroException {
      * @param e
      * @return
      */
-    @ExceptionHandler({UnauthorizedException.class})
+    @ExceptionHandler({UnauthorizedException.class, AuthorizationException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ModelAndView processUnauthenticatedException(NativeWebRequest request, HttpServletResponse response,UnauthorizedException e) {
         ModelAndView mv = new ModelAndView();
@@ -40,6 +41,7 @@ public class ShiroException {
         mv.setViewName("unauthorized");
         return mv;
     }
+
 
 
 //    @ExceptionHandler({ UnauthorizedException.class})

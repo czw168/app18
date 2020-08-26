@@ -46,16 +46,14 @@ public class ShiroConfig {
         // 配置系统受限资源
         // 配置系统公共资源
         Map<String,String> map = new HashMap<String,String>();
-        /**
-         * anon：公共资源
-         * authc：需要认证和授权的资源，需要放在anon的下面
-         */
+
+        // anon：公共资源
         map.put("/login","anon");
+        map.put("/user/loginto","anon");
         map.put("/css/**","anon");
         map.put("/img/**","anon");
         map.put("/js/**","anon");
-        // 一般跟用户相关的请求都属于公共资源
-        map.put("/user/**","anon");
+        // authc：需要认证和授权的资源，需要放在anon的下面
         map.put("/**","authc");
 
         // 默认认证界面路径
